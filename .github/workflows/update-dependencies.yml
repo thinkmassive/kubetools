@@ -1,0 +1,100 @@
+name: Update Dependencies
+on:
+  schedule:
+    - cron:  '0/10 * * * *'
+jobs:
+  updateDependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get Latest Upstream Releases
+        id: latest-upstream
+        run: |
+          latest_helm=$(curl -sL https://api.github.com/repos/helm/helm/releases/latest | jq -r ".tag_name" | sed 's/^v//')
+          latest_jb=$(curl -sL https://api.github.com/repos/jsonnet-bundler/jsonnet-bundler/releases/latest | jq -r ".tag_name" | sed 's/^v//')
+          latest_jsonnet=$(curl -sL https://api.github.com/repos/google/jsonnet/releases/latest | jq -r ".tag_name" | sed 's/^v//')
+          latest_jsontoyaml=$(curl -sL https://api.github.com/repos/brancz/gojsontoyaml/releases/latest | jq -r ".tag_name" | sed 's/^v//')
+          latest_kubectl=$(curl -sL https://api.github.com/repos/kubernetes/kubectl/releases/latest | jq -r ".tag_name")
+          latest_kubectl=$(curl -sL https://dl.k8s.io/release/stable.txt)
+
+          echo "latest_helm=$latest_helm" >> $GITHUB_OUTPUT
+          echo "latest_jb=$latest_jb" >> $GITHUB_OUTPUT
+          echo "latest_jsonnet=$latest_jsonnet" >> $GITHUB_OUTPUT
+          echo "latest_jsontoyaml=$latest_jsontoyaml" >> $GITHUB_OUTPUT
+          echo "latest_kubectl=$latest_kubectl" >> $GITHUB_OUTPUT
+
+          current_helm=$(grep 'ARG HELM_VERSION=' Dockerfile | sed 's/ARG HELM_VERSION=//')
+          current_jb=$(grep 'ARG JB_VERSION=' Dockerfile | sed 's/ARG JB_VERSION=//')
+          current_jsonnet=$(grep 'ARG JSONNET_VERSION=' Dockerfile | sed 's/ARG JSONNET_VERSION=//')
+          current_jsontoyaml=$(grep 'ARG JSONTOYAML_VERSION=' Dockerfile | sed 's/ARG JSONTOYAML_VERSION=//')
+          current_kubectl=$(grep 'ARG KUBECTL_VERSION=' Dockerfile | sed 's/ARG KUBECTL_VERSION=//')
+
+          echo "current_helm=$current_helm" >> $GITHUB_OUTPUT
+          echo "current_jb=$current_jb" >> $GITHUB_OUTPUT
+          echo "current_jsonnet=$current_jsonnet" >> $GITHUB_OUTPUT
+          echo "current_jsontoyaml=$current_jsontoyaml" >> $GITHUB_OUTPUT
+          echo "current_kubectl=$current_kubectl" >> $GITHUB_OUTPUT
+
+      - name: Bump helm
+        if: steps.latest-upstream.outputs.current_helm != steps.latest-upstream.outputs.latest_helm
+        env:
+          RELEASE_TAG: ${{ steps.latest-upstream.outputs.latest_helm }}
+        run: |
+          sed -i "s/ARG HELM_VERSION=.*/ARG HELM_VERSION=$RELEASE_TAG/" Dockerfile
+          #echo ${{ steps.latest-upstream.outputs.latest_helm }} > versions/helm.version
+
+      - name: Bump jb
+        if: steps.latest-upstream.outputs.current_jb != steps.latest-upstream.outputs.latest_jb
+        env:
+          RELEASE_TAG: ${{ steps.latest-upstream.outputs.latest_jb }}
+        run: |
+          sed -i "s/ARG JB_VERSION=.*/ARG JB_VERSION=$RELEASE_TAG/" Dockerfile
+          #echo ${{ steps.latest-upstream.outputs.latest_jb }} > versions/jb.version
+
+      - name: Bump jsonnet
+        if: steps.latest-upstream.outputs.current_jsonnet != steps.latest-upstream.outputs.latest_jsonnet
+        env:
+          RELEASE_TAG: ${{ steps.latest-upstream.outputs.latest_jsonnet }}
+        run: |
+          sed -i "s/ARG JSONNET_VERSION=.*/ARG JSONNET_VERSION=$RELEASE_TAG/" Dockerfile
+          #echo ${{ steps.latest-upstream.outputs.latest_jsonnet }} > versions/jsonnet.version
+
+      - name: Bump jsontoyaml
+        if: steps.latest-upstream.outputs.current_jsontoyaml != steps.latest-upstream.outputs.latest_jsontoyaml
+        env:
+          RELEASE_TAG: ${{ steps.latest-upstream.outputs.latest_jsontoyaml }}
+        run: |
+          sed -i "s/ARG JSONTOYAML_VERSION=.*/ARG JSONTOYAML_VERSION=$RELEASE_TAG/" Dockerfile
+          #echo ${{ steps.latest-upstream.outputs.latest_jsontoyaml }} > versions/jsontoyaml.version
+
+      - name: Bump kubectl
+        if: steps.latest-upstream.outputs.current_kubectl != steps.latest-upstream.outputs.latest_kubectl
+        env:
+          RELEASE_TAG: ${{ steps.latest-upstream.outputs.latest_kubectl }}
+        run: |
+          #sed -i "s/ARG KUBECTL_VERSION=.*/ARG KUBECTL_VERSION=$RELEASE_TAG/" Dockerfile
+          #echo ${{ steps.latest-upstream.outputs.latest_kubectl }} > versions/kubectl.version
+          echo "latest kubectl: ${{ steps.latest-upstream.outputs.latest_kubectl }}"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          commit-message: Dependency auto-update
+          title: Dependency auto-update
+          body: |
+            [helm][2] ${{ steps.latest-upstream.outputs.latest_helm }}
+            [jb][3] ${{ steps.latest-upstream.outputs.latest_jb }}
+            [jsonnet][4] ${{ steps.latest-upstream.outputs.latest_jsonnet }}
+            [jsontoyaml][5] ${{ steps.latest-upstream.outputs.latest_jsontoyaml }}
+            [kubectl][6] ${{ steps.latest-upstream.outputs.latest_kubectl }}
+
+            Auto-generated by [create-pull-request][1]
+
+            [1]:https://github.com/peter-evans/create-pull-request
+            [2]:https://api.github.com/repos/helm/helm
+            [3]:https://api.github.com/repos/jsonnet-bundler/jsonnet-bundler
+            [4]:https://api.github.com/repos/google/jsonnet
+            [5]:https://api.github.com/repos/brancz/gojsontoyaml
+            [6]:https://api.github.com/repos/kubernetes/kubectl
+          labels: dependencies, automated pr
+          branch: upstream-updates
