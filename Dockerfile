@@ -2,7 +2,7 @@ FROM debian:stable-slim
 
 LABEL maintainer "thinkmassive <miller@lightning.engineering>"
 
-ARG HELM_VERSION=3.10.1
+ARG HELM_VERSION=3.10.2
 ARG JSONNET_VERSION=0.19.1
 ARG JSONTOYAML_VERSION=0.1.0
 ARG JB_VERSION=0.5.1
