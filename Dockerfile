@@ -3,6 +3,7 @@ FROM debian:stable-slim
 LABEL maintainer "Miller <alex@thinkmassive.org>"
 
 ARG ARGOCD_VERSION=2.5.4
+ARG TEKTONCDCLI_VERSION=0.28.0
 ARG HELM_VERSION=3.10.3
 ARG JSONNET_VERSION=0.19.1
 ARG JSONTOYAML_VERSION=0.1.0
@@ -54,3 +55,8 @@ RUN mkdir /tmp/gojsontoyaml \
 RUN curl -sSLO "https://github.com/argoproj/argo-cd/releases/download/v${ARGOCD_VERSION}/argocd-linux-amd64" \
   && install -m 555 argocd-linux-amd64 /usr/local/bin/argocd \
   && rm argocd-linux-amd64
+
+# install tektoncd-cli
+RUN curl -sSL -o tektoncd-cli.deb "https://github.com/tektoncd/cli/releases/download/v${TEKTONCDCLI_VERSION}/tektoncd-cli-${TEKTONCDCLI_VERSION}_Linux-64bit.deb" \
+  && dpkg -i tektoncd-cli.deb \
+  && rm tektoncd-cli.deb
