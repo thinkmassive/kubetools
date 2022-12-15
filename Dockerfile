@@ -4,6 +4,7 @@ LABEL maintainer "Miller <alex@thinkmassive.org>"
 
 ARG ARGOCD_VERSION=2.5.4
 ARG TEKTONCDCLI_VERSION=0.28.0
+ARG KNATIVE_VERSION=1.8.1
 ARG HELM_VERSION=3.10.3
 ARG JSONNET_VERSION=0.19.1
 ARG JSONTOYAML_VERSION=0.1.0
@@ -60,3 +61,8 @@ RUN curl -sSLO "https://github.com/argoproj/argo-cd/releases/download/v${ARGOCD_
 RUN curl -sSL -o tektoncd-cli.deb "https://github.com/tektoncd/cli/releases/download/v${TEKTONCDCLI_VERSION}/tektoncd-cli-${TEKTONCDCLI_VERSION}_Linux-64bit.deb" \
   && dpkg -i tektoncd-cli.deb \
   && rm tektoncd-cli.deb
+
+# install knative
+RUN curl -sSL -o kn "https://github.com/knative/client/releases/download/knative-v${KNATIVE_VERSION}/kn-linux-amd64" \
+  && install -m 555 kn /usr/local/bin/kn \
+  && rm kn
