@@ -22,10 +22,6 @@ Binaries in `/bin/`
 - [gojsontoyaml](https://github.com/brancz/gojsontoyaml/) JSON to YAML
   converter
 
-Libraries in `/lib/`
-- [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus.git)
-  jsonnet library, in `/data/kube-prometheus`
-
 The base image will be extended for various cloud providers.
 
 ## Usage
@@ -44,14 +40,4 @@ aliases for each of the included applications:
 KUBETOOLS_ALIASES='kubetools gojsontoyaml helm jsonnet jb kubectl'
 
 source kubetools.sh
-```
-
-### kube-prometheus
-
-#### kube-prometheus installation
-
-```shell
-kube_prom_version=release-0.8
-jb install
-#  github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@$kube_prom_version
 ```
