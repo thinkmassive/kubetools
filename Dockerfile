@@ -54,7 +54,7 @@ RUN mkdir /tmp/gojsontoyaml \
 
 # install argocd
 RUN curl -sSLO "https://github.com/argoproj/argo-cd/releases/download/v${ARGOCD_VERSION}/argocd-linux-amd64" \
-  && install -m 555 argocd-linux-amd64 /usr/local/bin/argocd \
+  && install -m 555 argocd-linux-amd64 /bin/argocd \
   && rm argocd-linux-amd64
 
 # install tektoncd-cli
@@ -64,5 +64,5 @@ RUN curl -sSL -o tektoncd-cli.deb "https://github.com/tektoncd/cli/releases/down
 
 # install knative
 RUN curl -sSL -o kn "https://github.com/knative/client/releases/download/knative-v${KNATIVE_VERSION}/kn-linux-amd64" \
-  && install -m 555 kn /usr/local/bin/kn \
+  && install -m 555 kn /bin/kn \
   && rm kn
