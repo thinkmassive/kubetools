@@ -2,6 +2,7 @@ FROM debian:stable-slim
 
 LABEL maintainer "Miller <alex@thinkmassive.org>"
 
+ARG ARGOCD_VERSION=2.5.4
 ARG HELM_VERSION=3.10.3
 ARG JSONNET_VERSION=0.19.1
 ARG JSONTOYAML_VERSION=0.1.0
@@ -48,3 +49,8 @@ RUN mkdir /tmp/gojsontoyaml \
   && ls -la /tmp/gojsontoyaml \
   && install -o root -g root -m 0755 /tmp/gojsontoyaml/gojsontoyaml /bin/gojsontoyaml \
   && rm -rf gojsontoyaml.tgz /tmp/gojsontoyaml
+
+# install argocd
+RUN curl -sSLO "https://github.com/argoproj/argo-cd/releases/download/v${ARGOCD_VERSION}/argocd-linux-amd64" \
+  && install -m 555 argocd-linux-amd64 /usr/local/bin/argocd \
+  && rm argocd-linux-amd64

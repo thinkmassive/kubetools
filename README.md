@@ -11,6 +11,7 @@ This image bundles the following utilties and libraries, useful for
 maintaining Kubernetes clusters:
 
 Binaries in `/bin/`
+- [argocd](https://github.com/argoproj/argo-cd/releases) GitOps controller
 - [helm](https://github.com/helm/helm/releases) Kubernetes package
   manager
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
