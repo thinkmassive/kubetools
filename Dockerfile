@@ -1,6 +1,6 @@
 FROM debian:stable-slim
 
-LABEL maintainer "thinkmassive <miller@lightning.engineering>"
+LABEL maintainer "Miller <alex@thinkmassive.org>"
 
 ARG HELM_VERSION=3.10.2
 ARG JSONNET_VERSION=0.19.1
