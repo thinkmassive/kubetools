@@ -63,6 +63,7 @@ RUN curl -sSL -o tektoncd-cli.deb "https://github.com/tektoncd/cli/releases/down
   && rm tektoncd-cli.deb
 
 # install knative
-RUN curl -sSL -o kn "https://github.com/knative/client/releases/download/knative-v${KNATIVE_VERSION}/kn-linux-amd64" \
-  && install -m 555 kn /bin/kn \
-  && rm kn
+RUN curl -sSL -o kn-linux-amd64 "https://github.com/knative/client/releases/download/knative-v${KNATIVE_VERSION}/kn-linux-amd64" \
+  && install -m 555 kn-linux-amd64 /bin/kn \
+  && ls -l /bin/kn \
+  && rm kn-linux-amd64
