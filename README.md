@@ -29,20 +29,35 @@ none are included at this time.
 
 ## Usage
 
-The `kubetools.sh` script makes it easy to use any of the bundled tools nearly
-the same as if they were installed natively.
-
-Simply run `./kubetools.sh <cmd> [<arg(s)>]` to launch `<cmd>`. You can also
-run the script with no arguments to drop into a bash shell inside the container.
-
-Aliases can be used to map the original tool names to use the helper script,
-and the script even includes an option to easily add/remove these from your
-`.bashrc`:
+The official images are hosted at Github and signed by Cosign:
+- https://github.com/thinkmassive/kubetools/pkgs/container/kubetools
 
 ```shell
-./kubetools.sh --install
-./kubetools.sh --uninstall
+docker pull ghcr.io/thinkmassive/kubetools:main
 ```
+
+Additional images _may_ be published to
+[DockerHub](https://hub.docker.com/repository/docker/thinkmassive/kubetools)
+for convenience, although using the GHCR images is preferred.
+
+The `kubetools.sh` script makes it easy to use any of the bundled tools nearly
+the same as if they were installed natively:
+
+```shell
+./kubetools.sh [<cmd> [<arg(s)>]]
+```
+
+### Examples
+- List nodes using `kubectl`: `./kubetools.sh kubectl get nodes`
+- List installed `helm` releases: `./kubetools.sh helm ls`
+- Get a shell inside the container: `./kubetools.sh`
+
+### Aliases
+Aliases can be used to map the original tool names to call the helper script.
+The script includes an option to easily add/remove them from `.bashrc`:
+
+- Add/update aliases: `./kubetools.sh --install`
+- Remove aliases: `./kubetools.sh --uninstall`
 
 ## Configuation
 
@@ -53,8 +68,8 @@ Default options can be overridden by the following environment variables:
 | `KUBETOOLS_ALIASES`    | Aliases to create in `.bashrc` | `kubetools argocd helm jb jsonnet kn kubectl tkn` |
 | `KUBETOOLS_BASHRC`     | Absolute path to `.bashrc` to modify | `$HOME/.bashrc` |
 | `KUBETOOLS_KUBECONFIG` | Absolute path to KUBECONFIG    | `$HOME/.kube/config` |
-| `KUBETOOLS_IMAGE`      | Container image repository     | `thinkmassive/kubetools` |
-| `KUBETOOLS_TAG`        | Container image tag            | `v0.2.2` |
+| `KUBETOOLS_IMAGE`      | Container image registry & repository | `ghcr.io/thinkmassive/kubetools` |
+| `KUBETOOLS_TAG`        | Container image tag            | `main` |
 | `KUBETOOLS_VERBOSITY`  | Log level (0 to 2)             | `1` |
 
 ---
