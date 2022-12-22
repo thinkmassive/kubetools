@@ -1,16 +1,18 @@
 # kubetools
 
-## Pre-release Software
+A toolbox for working with Kubernetes manifests and clusters, packaged as a
+container image, with a helper script to easily run the utilities as if they
+were installed natively on the host system.
 
-This repo is still under development. It may be force-pushed often, so
-please don't use it yet. This notice will be removed upon release.
+This is primarily intended for use in development and lab environments. For
+secure environments (build pipelines, production clusters), it is recommended
+to use slimmed down images that contain only the essentials.
 
----
+The following tools are included:
 
-This image bundles the following utilties and libraries, useful for
-maintaining Kubernetes clusters:
-
-Binaries in `/bin/`
+- [argocd](https://github.com/argoproj/argo-cd/releases) GitOps controller
+- [tektoncd-cli](https://github.com/tektoncd/cli/releases) CI/CD
+- [knative](https://github.com/knative/client/releases) serverless framework
 - [helm](https://github.com/helm/helm/releases) Kubernetes package
   manager
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
@@ -22,36 +24,37 @@ Binaries in `/bin/`
 - [gojsontoyaml](https://github.com/brancz/gojsontoyaml/) JSON to YAML
   converter
 
-Libraries in `/lib/`
-- [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus.git)
-  jsonnet library, in `/data/kube-prometheus`
-
-The base image will be extended for various cloud providers.
+Eventually the base image might be extended for various cloud providers, but
+none are included at this time.
 
 ## Usage
 
-You can source the `kubetools.sh` script into your shell to get
-aliases for each of the included applications:
+The `kubetools.sh` script makes it easy to use any of the bundled tools nearly
+the same as if they were installed natively.
 
-- `kubetools` (runs `/bin/sh` in the container)
-- `gojsontoyaml`
-- `helm`
-- `kubectl`
-- `jb` (jsonnet-bundler)
-- `jsonnet`
+Simply run `./kubetools.sh <cmd> [<arg(s)>]` to launch `<cmd>`. You can also
+run the script with no arguments to drop into a bash shell inside the container.
 
-```shell
-KUBETOOLS_ALIASES='kubetools gojsontoyaml helm jsonnet jb kubectl'
-
-source kubetools.sh
-```
-
-### kube-prometheus
-
-#### kube-prometheus installation
+Aliases can be used to map the original tool names to use the helper script,
+and the script even includes an option to easily add/remove these from your
+`.bashrc`:
 
 ```shell
-kube_prom_version=release-0.8
-jb install
-#  github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@$kube_prom_version
+./kubetools.sh --install
+./kubetools.sh --uninstall
 ```
+
+## Configuation
+
+Default options can be overridden by the following environment variables:
+
+| Env var                | Description                    | Default value |
+|------------------------|--------------------------------|---------------|
+| `KUBETOOLS_ALIASES`    | Aliases to create in `.bashrc` | `kubetools argocd helm jb jsonnet kn kubectl tkn` |
+| `KUBETOOLS_BASHRC`     | Absolute path to `.bashrc` to modify | `$HOME/.bashrc` |
+| `KUBETOOLS_KUBECONFIG` | Absolute path to KUBECONFIG    | `$HOME/.kube/config` |
+| `KUBETOOLS_IMAGE`      | Container image repository     | `thinkmassive/kubetools` |
+| `KUBETOOLS_TAG`        | Container image tag            | `v0.2.2` |
+| `KUBETOOLS_VERBOSITY`  | Log level (0 to 2)             | `1` |
+
+---
