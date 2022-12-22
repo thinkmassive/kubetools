@@ -66,7 +66,7 @@ Default options can be overridden by the following environment variables:
 | Env var                | Description                    | Default value |
 |------------------------|--------------------------------|---------------|
 | `KUBETOOLS_ALIASES`    | Aliases to create in `.bashrc` | `kubetools argocd helm jb jsonnet kn kubectl tkn` |
-| `KUBETOOLS_BASHRC`     | Absolute path to `.bashrc` to modify | `$HOME/.bashrc` |
+| `KUBETOOLS_ALIAS_FILE` | Absolute path to `.bash_aliases` to modify | `$HOME/.bash_aliases` |
 | `KUBETOOLS_KUBECONFIG` | Absolute path to KUBECONFIG    | `$HOME/.kube/config` |
 | `KUBETOOLS_IMAGE`      | Container image registry & repository | `ghcr.io/thinkmassive/kubetools` |
 | `KUBETOOLS_TAG`        | Container image tag            | `main` |

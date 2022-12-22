@@ -6,7 +6,7 @@
 ##################
 
 KUBETOOLS_ALIASES="${KUBETOOLS_ALIASES:-kubetools argocd helm jb jsonnet kn kubectl tkn}"
-KUBETOOLS_BASHRC="${KUBETOOLS_BASHRC:-$HOME/.bashrc}"
+KUBETOOLS_ALIAS_FILE="${KUBETOOLS_ALIAS_FILE:-$HOME/.bash_aliases}"
 KUBETOOLS_KUBECONFIG="${KUBETOOLS_KUBECONFIG:-$HOME/.kube/config}"
 KUBETOOLS_IMAGE="${KUBETOOLS_IMAGE:-ghcr.io/thinkmassive/kubetools}"
 KUBETOOLS_TAG="${KUBETOOLS_TAG:-main}"
@@ -42,7 +42,9 @@ kt_help() {
   echo
   echo "Usage: kubetools [--help|--install|--uninstall] [<cmd> [<arg(s)>]]"
   echo "  kubetools [--help|--install|--uninstall]"
-  echo "  --install adds/updates kubetools variables+aliases in .bashrc"
+  echo "  --install adds/updates kubetools aliases in .bash_aliases"
+  echo "  --uninstall removes kubetools aliases from .bash_aliases"
+  echo "  --versions prints current version of each bundled utility"
   echo "  --help prints these usage instructions"
   echo
   echo "  kubetools <cmd> [<arg(s)>]"
@@ -55,27 +57,22 @@ kt_cmd() {
 }
 
 kt_install () {
-  if [ ! -e $KUBETOOLS_BASHRC ]; then
-    echo "[ERR] File not found: $KUBETOOLS_BASHRC"
+  if [ ! -e $KUBETOOLS_ALIAS_FILE ]; then
+    echo "[ERR] File not found: $KUBETOOLS_ALIAS_FILE"
     exit 1
   else
     echo "Installing/updating kubetools variables and aliases in:"
-    echo " $KUBETOOLS_BASHRC"
+    echo " $KUBETOOLS_ALIAS_FILE"
     echo
     for cmd in $KUBETOOLS_ALIASES; do
-      #echo -en "  $cmd:\t"
+      local status=ERROR
       local alias_line="alias $cmd='$KUBETOOLS_SCRIPT $cmd'"
-      if [ $(grep -c "^alias $cmd=" $KUBETOOLS_BASHRC) -gt 0 ]; then
-        sed -i "s|^alias $cmd=.*|$alias_line|" $KUBETOOLS_BASHRC && \
-          #echo "(updated)"
-          printf '  %-20s %s\n' "alias $cmd: " 'updated' || \
-          printf '  %-20s %s\n' "alias $cmd: " 'ERROR'
+      if [ $(grep -c "^alias $cmd=" $KUBETOOLS_ALIAS_FILE) -gt 0 ]; then
+        sed -i "s|^alias $cmd=.*|$alias_line|" $KUBETOOLS_ALIAS_FILE && status=updated
       else
-        echo "$alias_line" >> $KUBETOOLS_BASHRC && \
-	  #echo "(installed)"
-          printf '  %-20s %s\n' "alias $cmd: " 'installed' || \
-          printf '  %-20s %s\n' "alias $cmd: " 'ERROR'
+        echo "$alias_line" >> $KUBETOOLS_ALIAS_FILE && status=installed
       fi
+      printf '  %-20s %s\n' "alias $cmd: " "$status"
     #  [[ $KUBETOOLS_VERBOSITY -gt 1 ]] && echo -e "\n$cmd:\t$alias_cmd"
     #  alias $cmd="$alias_cmd"
     #  if [[ $KUBETOOLS_VERBOSITY -gt 1 ]]; then
@@ -87,33 +84,40 @@ kt_install () {
   fi
 }
 
-kt_uninstall () {
-  if [ ! -e $KUBETOOLS_BASHRC ]; then
-    echo "[ERR] File not found: $KUBETOOLS_BASHRC"
+kt_uninstall() {
+  if [ ! -e $KUBETOOLS_ALIAS_FILE ]; then
+    echo "[ERR] File not found: $KUBETOOLS_ALIAS_FILE"
     exit 1
   else
     echo "Uninstalling kubetools variables and aliases from:"
-    echo " $KUBETOOLS_BASHRC"
+    echo " $KUBETOOLS_ALIAS_FILE"
     echo
     for cmd in $KUBETOOLS_ALIASES; do
-      if [ $(grep -c "^alias $cmd=" $KUBETOOLS_BASHRC) -gt 0 ]; then
-        sed -i "/^alias $cmd=.*/d" $KUBETOOLS_BASHRC && \
-          printf '  %-20s %s\n' "alias $cmd: " 'removed' || \
-          printf '  %-20s %s\n' "alias $cmd: " 'ERROR'
+      local status=ERROR
+      if [ $(grep -c "^alias $cmd=" $KUBETOOLS_ALIAS_FILE) -gt 0 ]; then
+        sed -i "/^alias $cmd=.*/d" $KUBETOOLS_ALIAS_FILE && status=removed
       else
-        printf '  %-20s %s\n' "alias $cmd: " 'absent'
+        status=absent
       fi
-    #  [[ $KUBETOOLS_VERBOSITY -gt 1 ]] && echo -e "\n$cmd:\t$alias_cmd"
-    #  alias $cmd="$alias_cmd"
-    #  if [[ $KUBETOOLS_VERBOSITY -gt 1 ]]; then
-    #    $alias_cmd --version >/dev/null && $alias_cmd --version
-    #    $alias_cmd version >/dev/null && $alias_cmd version
-    #    echo
-    #  fi
+      printf '  %-20s %s\n' "alias $cmd: " "$status"
     done
   fi
 }
 
+kt_versions() {
+  for cmd in $KUBETOOLS_ALIASES; do
+    if [ $cmd != 'kubetools' ]; then
+      echo
+      echo "$cmd:"
+      local alias_cmd="$KUBETOOLS_RUN $cmd"
+      if $alias_cmd --version >/dev/null; then
+        $alias_cmd --version
+      else
+        $alias_cmd version
+      fi
+    fi
+  done
+}
 
 #############
 # Entrypoint
@@ -126,12 +130,11 @@ else
   case $1 in
     '--install') kt_install;;
     '--uninstall') kt_uninstall;;
+    '--versions') kt_versions;;
     '--help' | '-h') kt_help;;
     --*) echo "Unknown option '$1'"; echo; kt_help;;
     *)
       $KUBETOOLS_RUN $@
-      #shift
-      #echo $KUBETOOLS_RUN $@;;
   esac
 fi
 
