@@ -2,7 +2,7 @@ FROM debian:stable-slim
 
 LABEL maintainer "Miller <alex@thinkmassive.org>"
 
-ARG ARGOCD_VERSION=2.5.4
+ARG ARGOCD_VERSION=2.5.5
 ARG TEKTONCDCLI_VERSION=0.28.0
 ARG KNATIVE_VERSION=1.8.1
 ARG HELM_VERSION=3.10.3
